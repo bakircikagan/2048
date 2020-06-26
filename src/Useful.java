@@ -22,6 +22,47 @@ public final class Useful {
         return list;
     }
 
+    public static boolean allRowsMovable(int[][] matrix) {
+        require(matrix != null);
+        require(matrix.length == matrix[0].length);
+
+        boolean allMovable = true;
+        for (int i = 0; allMovable && i < matrix.length; ++i) {
+            boolean containsZero = false;
+            for (int j = 0; !containsZero && j < matrix[0].length; ++j) {
+                containsZero = containsZero || matrix[i][j] == 0;
+            }
+            if (!containsZero) {
+                boolean containsPair = false;
+                for (int j = 0; !containsPair && j < matrix[0].length - 1; ++j) {
+                    containsPair = containsPair || matrix[i][j] == matrix[i][j + 1];
+                }
+                allMovable = allMovable && containsPair;
+            }
+        }
+        return allMovable;
+    }
+
+    public static boolean allColsMovable(int[][] matrix) {
+        require(matrix != null);
+        require(matrix.length == matrix[0].length);
+        boolean allMovable = true;
+        for (int j = 0; allMovable && j < matrix[0].length; ++j) {
+            boolean containsZero = false;
+            for (int i = 0; !containsZero && i < matrix.length; ++i) {
+                containsZero = containsZero || matrix[i][j] == 0;
+            }
+            if (!containsZero) {
+                boolean containsPair = false;
+                for (int i = 0; !containsPair && i < matrix.length - 1; ++i) {
+                    containsPair = containsPair || matrix[i][j] == matrix[i + 1][j];
+                }
+                allMovable = allMovable && containsPair;
+            }
+        }
+        return allMovable;
+    }
+
     public static void setMatrixRow(int[][] matrix, int rowNum, ArrayList<Integer> list) {
         require(matrix != null);
         require(rowNum < matrix.length);

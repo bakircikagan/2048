@@ -14,6 +14,9 @@ public final class Game implements Subject {
     private int[][] matrix;
     private final Observer observer;
     private HashSet<Position> emptyCells;
+    private int score;
+    private boolean rowsMovable;
+    private boolean colsMovable;
 
     // Constructors
     public Game(int s, Observer o) {
@@ -21,6 +24,9 @@ public final class Game implements Subject {
         observer = o;
         matrix = new int[size][size];
         emptyCells = new HashSet<>();
+        score = 0;
+        rowsMovable = true;
+        colsMovable = true;
 
         updateEmptyCellInfo();
         generateRandomCell();
@@ -47,31 +53,38 @@ public final class Game implements Subject {
     }
 
     //Methods
+    public int getScore() {
+        return score;
+    }
+
     public int getNum(int i, int j) {
         return matrix[i][j];
     }
 
     public boolean isOver() {
+        if (!colsMovable && !rowsMovable) {
+            return true;
+        }
         if (emptyCells.isEmpty()) {
-            Game simulate = new Game(this);
-            simulate.moveLeft(false);
-            simulate.moveRight(false);
-            simulate.moveUp(false);
-            simulate.moveDown(false);
-            simulate.updateEmptyCellInfo();
-            return simulate.emptyCells.isEmpty();
+            Game simulation = new Game(this);
+            simulation.moveLeft(false);
+            simulation.moveRight(false);
+            simulation.moveUp(false);
+            simulation.moveDown(false);
+            simulation.updateEmptyCellInfo();
+            return simulation.emptyCells.isEmpty();
         }
         return false;
     }
 
-    public int calculateScore() {
-        int score = Integer.MIN_VALUE;
+    public int getHighestTile() {
+        int max = Integer.MIN_VALUE;
         for (int  i = 0; i < size; ++i) {
             for (int  j = 0; j < size; ++j) {
-                score = Math.max(score, matrix[i][j]);
+                max = Math.max(max, matrix[i][j]);
             }
         }
-        return score;
+        return max;
     }
 
     @Override
@@ -80,6 +93,13 @@ public final class Game implements Subject {
     }
 
     public void moveLeft(boolean enable) {
+        if (!Useful.allRowsMovable(matrix)) {
+            rowsMovable = false;
+            notifyObserver();
+            return;
+        }
+        rowsMovable = true;
+
         Thread[] threads = new Thread[size];
         for(int i = 0; i < size; ++i) {
             int row = i;
@@ -93,6 +113,13 @@ public final class Game implements Subject {
     }
 
     public void moveRight(boolean enable) {
+        if (!Useful.allRowsMovable(matrix)) {
+            rowsMovable = false;
+            notifyObserver();
+            return;
+        }
+        rowsMovable = true;
+
         Thread[] threads = new Thread[size];
         for(int i = 0; i < size; ++i) {
             int row = i;
@@ -106,6 +133,13 @@ public final class Game implements Subject {
     }
 
     public void moveUp(boolean enable) {
+        if (!Useful.allColsMovable(matrix)) {
+            colsMovable = false;
+            notifyObserver();
+            return;
+        }
+        colsMovable = true;
+
         Thread[] threads = new Thread[size];
         for(int j = 0; j < size; ++j) {
             int col = j;
@@ -119,6 +153,13 @@ public final class Game implements Subject {
     }
 
     public void moveDown(boolean enable) {
+        if (!Useful.allColsMovable(matrix)) {
+            colsMovable = false;
+            notifyObserver();
+            return;
+        }
+        colsMovable = true;
+
         Thread[] threads = new Thread[size];
         for(int j = 0; j < size; ++j) {
             int col = j;
@@ -250,6 +291,7 @@ public final class Game implements Subject {
                 int newValue = current << 1;
                 list.set(i, newValue);
                 list.set(i + 1, 0);
+                score += newValue;
             }
         }
     }
@@ -261,6 +303,7 @@ public final class Game implements Subject {
                 int newValue = current << 1;
                 list.set(i, newValue);
                 list.set(i - 1, 0);
+                score += newValue;
             }
         }
     }
